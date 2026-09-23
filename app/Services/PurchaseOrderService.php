@@ -83,7 +83,7 @@ class PurchaseOrderService
 
             $minimumByMaterial = $po->detailPos()
                 ->pluck('jumlah_material', 'material_id')
-                ->map(fn ($jumlah) => (int) $jumlah)
+                ->map(fn($jumlah) => (int) $jumlah)
                 ->all();
             foreach ($data['details'] as $detail) {
                 $minimum = $minimumByMaterial[(int) $detail['material_id']] ?? 1;
@@ -99,7 +99,7 @@ class PurchaseOrderService
             ]);
             $po->detailPos()->delete();
             $po->detailPos()->createMany(array_map(
-                fn (array $detail): array => [
+                fn(array $detail): array => [
                     'material_id' => $detail['material_id'],
                     'jumlah_material' => $detail['jumlah_material'],
                 ],

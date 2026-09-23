@@ -3,12 +3,14 @@
     <x-card title="{{ $purchaseOrder->nomor_po }}">
         <div class="mb-5 flex flex-wrap items-center gap-3">
             <x-badge>{{ str_replace('_', ' ', $purchaseOrder->status_po) }}</x-badge><span
-                class="text-sm text-text-secondary">{{ $purchaseOrder->tanggal_po?->format('d/m/Y') }}</span></div>
+                class="text-sm text-text-secondary">{{ $purchaseOrder->tanggal_po?->format('d/m/Y') }}</span>
+        </div>
         @if (auth()->user()->role === 'admin' && $purchaseOrder->status_po === 'rejected')
             <div class="mb-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-danger">
                 <p class="font-semibold">PO ditolak manager.</p>
                 <p class="mt-1">Alasan: {{ $purchaseOrder->catatan_penolakan ?: 'Tidak ada catatan.' }}</p>
-                <a href="{{ route('purchase-orders.revisi-form', $purchaseOrder) }}" class="mt-3 inline-block font-semibold underline">Revisi dan ajukan ulang</a>
+                <a href="{{ route('purchase-orders.revisi-form', $purchaseOrder) }}"
+                    class="mt-3 inline-block font-semibold underline">Revisi dan ajukan ulang</a>
             </div>
         @endif
         @if (auth()->user()->role === 'manajer' && $purchaseOrder->status_po === 'diajukan')

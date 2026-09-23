@@ -24,7 +24,7 @@ class PurchaseOrderController extends Controller
         return DataTables::of(PurchaseOrder::with(['user', 'permintaanProduksi']))
             ->addColumn('pengaju', fn(PurchaseOrder $row) => $row->user->nama)
             ->editColumn('status_po', fn(PurchaseOrder $row) => view('partials.datatables.status', ['status' => $row->status_po])->render())
-            ->addColumn('aksi', fn (PurchaseOrder $row) => view('partials.datatables.actions', [
+            ->addColumn('aksi', fn(PurchaseOrder $row) => view('partials.datatables.actions', [
                 'showUrl' => route('purchase-orders.show', $row),
                 'editUrl' => auth()->user()->role === 'admin' && $row->status_po === 'rejected'
                     ? route('purchase-orders.revisi-form', $row)

@@ -27,7 +27,7 @@ class RevisePurchaseOrderRequest extends FormRequest
         $purchaseOrder = $this->route('purchaseOrder');
         $minimumByMaterial = $purchaseOrder?->detailPos
             ?->pluck('jumlah_material', 'material_id')
-            ->map(fn ($jumlah) => (int) $jumlah)
+            ->map(fn($jumlah) => (int) $jumlah)
             ->all() ?? [];
 
         $validator->after(function (Validator $validator) use ($minimumByMaterial): void {
