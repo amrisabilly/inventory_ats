@@ -36,16 +36,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/users/data', [UserController::class, 'data'])->name('users.data');
         Route::resource('users', UserController::class)->except('show');
 
-        Route::get('/materials/data', [MaterialController::class, 'data'])->name('materials.data');
-        Route::get('/materials/{material}/stock', [MaterialController::class, 'stock'])->name('materials.stock');
-        Route::resource('materials', MaterialController::class)->except('show');
+        Route::resource('materials', MaterialController::class)->except(['index', 'show']);
 
         Route::get('/produk/data', [ProdukController::class, 'data'])->name('produk.data');
-        Route::resource('produk', ProdukController::class)->except('show');
+        Route::resource('produk', ProdukController::class);
 
         Route::post('/permintaan-produksi/{permintaanProduksi}/proses', [PermintaanProduksiController::class, 'proses'])->name('permintaan-produksi.proses');
-        Route::get('/purchase-orders/create', [PurchaseOrderController::class, 'create'])->name('purchase-orders.create');
-        Route::post('/purchase-orders', [PurchaseOrderController::class, 'store'])->name('purchase-orders.store');
+        Route::get('/perencanaan-produksi', [PermintaanProduksiController::class, 'index'])->name('perencanaan-produksi.index');
+        Route::get('/purchase-orders/{purchaseOrder}/revisi', [PurchaseOrderController::class, 'revisiForm'])->name('purchase-orders.revisi-form');
+        Route::put('/purchase-orders/{purchaseOrder}/revisi', [PurchaseOrderController::class, 'revisi'])->name('purchase-orders.revisi');
     });
 
     Route::middleware('role:manajer')->group(function () {
@@ -64,6 +63,9 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::middleware('role:admin,manajer,staff_workshop')->group(function () {
+        Route::get('/materials/data', [MaterialController::class, 'data'])->name('materials.data');
+        Route::get('/materials', [MaterialController::class, 'index'])->name('materials.index');
+        Route::get('/materials/{material}/stock', [MaterialController::class, 'stock'])->name('materials.stock');
         Route::get('/permintaan-produksi/data', [PermintaanProduksiController::class, 'data'])->name('permintaan-produksi.data');
         Route::get('/permintaan-produksi', [PermintaanProduksiController::class, 'index'])->name('permintaan-produksi.index');
         Route::get('/permintaan-produksi/{permintaanProduksi}', [PermintaanProduksiController::class, 'show'])->name('permintaan-produksi.show');

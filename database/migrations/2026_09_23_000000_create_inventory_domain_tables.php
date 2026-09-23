@@ -50,6 +50,7 @@ return new class extends Migration
             $table->unsignedInteger('jumlah_produksi');
             $table->enum('status_permintaan', [
                 'pending',
+                'siap_diproduksi',
                 'menunggu_po',
                 'menunggu_material',
                 'work_in_process',

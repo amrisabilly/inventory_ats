@@ -23,9 +23,21 @@ class LaporanController extends Controller
 
     public function data(Request $request)
     {
+        $jenis = $request->string('jenis', 'material')->toString();
         $query = $this->reportQuery($request);
+        $dataTable = DataTables::of($query->latest());
 
-        return DataTables::of($query->latest())->make(true);
+        if ($jenis === 'po') {
+            $dataTable->addColumn('pengaju', fn(PurchaseOrder $row) => $row->user?->nama ?? '-');
+        }
+
+        if ($jenis === 'opname') {
+            $dataTable
+                ->addColumn('material_nama', fn(StokOpname $row) => $row->material?->nama_material ?? '-')
+                ->addColumn('petugas', fn(StokOpname $row) => $row->user?->nama ?? '-');
+        }
+
+        return $dataTable->make(true);
     }
 
     public function cetakPdf(Request $request)

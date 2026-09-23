@@ -4,11 +4,14 @@ namespace App\Services;
 
 use App\Models\Material;
 use App\Models\PermintaanProduksi;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
 class ProduksiService
 {
+    public function __construct(private readonly PurchaseOrderService $purchaseOrderService) {}
+
     public function hitungKebutuhanMaterial(PermintaanProduksi $permintaan): array
     {
         return DB::transaction(function () use ($permintaan): array {
@@ -41,13 +44,18 @@ class ProduksiService
                     throw new RuntimeException("Material dengan ID {$materialId} tidak ditemukan.");
                 }
 
-                $stok = $material->stok_sistem;
+                // WIP sudah dialokasikan untuk produksi lain, jadi tidak boleh dipakai
+                // untuk memenuhi permintaan baru. Tetap dikembalikan sebagai informasi.
+                $stokSiapPakai = $material->stok_sistem;
                 $hasil[$materialId] = [
                     'material' => $material,
                     'dibutuhkan' => $jumlahDibutuhkan,
-                    'tersedia' => $stok,
-                    'kekurangan' => max(0, $jumlahDibutuhkan - $stok),
-                    'cukup' => $stok >= $jumlahDibutuhkan,
+                    'tersedia' => $stokSiapPakai,
+                    'stok_sistem' => $material->stok_sistem,
+                    'stok_wip' => $material->stok_wip,
+                    'stok_teralokasi' => $material->stok_sistem + $material->stok_wip,
+                    'kekurangan' => max(0, $jumlahDibutuhkan - $stokSiapPakai),
+                    'cukup' => $stokSiapPakai >= $jumlahDibutuhkan,
                 ];
             }
 
@@ -55,19 +63,34 @@ class ProduksiService
         });
     }
 
-    public function prosesPermintaanProduksi(PermintaanProduksi $permintaan): void
+    public function prosesPermintaanProduksi(PermintaanProduksi $permintaan, User $admin): void
     {
-        DB::transaction(function () use ($permintaan): void {
+        DB::transaction(function () use ($permintaan, $admin): void {
             if ($permintaan->status_permintaan !== 'pending') {
                 throw new RuntimeException('Permintaan produksi hanya dapat diproses saat berstatus pending.');
             }
 
             $kebutuhan = $this->hitungKebutuhanMaterial($permintaan);
             $ketersediaan = $this->cekKetersediaanStok($kebutuhan);
+            $materialKurang = collect($ketersediaan)
+                ->filter(fn(array $item) => !$item['cukup'])
+                ->map(fn(array $item): array => [
+                    'material_id' => $item['material']->id,
+                    'jumlah_material' => $item['kekurangan'],
+                ])
+                ->values()
+                ->all();
+
+            if ($materialKurang !== []) {
+                $this->purchaseOrderService->buatPO([
+                    'permintaan_produksi_id' => $permintaan->id,
+                    'tanggal_po' => now()->toDateString(),
+                    'details' => $materialKurang,
+                ], $admin);
+            }
+
             $permintaan->update([
-                'status_permintaan' => collect($ketersediaan)->every(fn(array $item) => $item['cukup'])
-                    ? 'pending'
-                    : 'menunggu_po',
+                'status_permintaan' => $materialKurang === [] ? 'siap_diproduksi' : 'menunggu_po',
             ]);
         });
     }
@@ -75,8 +98,8 @@ class ProduksiService
     public function mulaiProduksi(PermintaanProduksi $permintaan): void
     {
         DB::transaction(function () use ($permintaan): void {
-            if ($permintaan->status_permintaan !== 'pending') {
-                throw new RuntimeException('Produksi hanya dapat dimulai dari permintaan berstatus pending.');
+            if (!in_array($permintaan->status_permintaan, ['pending', 'siap_diproduksi'], true)) {
+                throw new RuntimeException('Produksi hanya dapat dimulai saat material siap diproduksi.');
             }
 
             $kebutuhan = $this->hitungKebutuhanMaterial($permintaan);

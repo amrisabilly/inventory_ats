@@ -27,22 +27,70 @@
 <body>
     <h1>Laporan {{ ucfirst($jenis) }}</h1>
     <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Data</th>
-                <th>Dibuat</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach ($data as $item)
+        @if ($jenis === 'po')
+            <thead>
                 <tr>
-                    <td>{{ $item->id }}</td>
-                    <td>{{ $item->nama_material ?? ($item->nomor_po ?? ($item->material?->nama_material ?? '-')) }}</td>
-                    <td>{{ $item->created_at }}</td>
+                    <th>Nomor PO</th>
+                    <th>Pengaju</th>
+                    <th>Status</th>
+                    <th>Tanggal PO</th>
                 </tr>
-            @endforeach
-        </tbody>
+            </thead>
+            <tbody>
+                @foreach ($data as $item)
+                    <tr>
+                        <td>{{ $item->nomor_po }}</td>
+                        <td>{{ $item->user?->nama ?? '-' }}</td>
+                        <td>{{ $item->status_po }}</td>
+                        <td>{{ $item->tanggal_po?->format('d/m/Y') }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        @elseif ($jenis === 'opname')
+            <thead>
+                <tr>
+                    <th>Material</th>
+                    <th>Petugas</th>
+                    <th>Stok Sistem</th>
+                    <th>Stok Fisik</th>
+                    <th>Selisih</th>
+                    <th>Tanggal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($data as $item)
+                    <tr>
+                        <td>{{ $item->material?->nama_material ?? '-' }}</td>
+                        <td>{{ $item->user?->nama ?? '-' }}</td>
+                        <td>{{ $item->stok_sistem }}</td>
+                        <td>{{ $item->stok_fisik }}</td>
+                        <td>{{ $item->selisih_stok }}</td>
+                        <td>{{ $item->tanggal_opname?->format('d/m/Y') }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        @else
+            <thead>
+                <tr>
+                    <th>Material</th>
+                    <th>Satuan</th>
+                    <th>Stok Sistem</th>
+                    <th>Stok WIP</th>
+                    <th>Dibuat</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($data as $item)
+                    <tr>
+                        <td>{{ $item->nama_material }}</td>
+                        <td>{{ $item->satuan }}</td>
+                        <td>{{ $item->stok_sistem }}</td>
+                        <td>{{ $item->stok_wip }}</td>
+                        <td>{{ $item->created_at?->format('d/m/Y') }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        @endif
     </table>
 </body>
 

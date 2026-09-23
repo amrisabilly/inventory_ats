@@ -17,12 +17,18 @@ class ProdukController extends Controller
         return view('produk.index');
     }
 
+    public function show(Produk $produk): View
+    {
+        return view('produk.show', ['produk' => $produk->load('boms.detailBoms.material')]);
+    }
+
     public function data()
     {
-        return DataTables::of(Produk::query()->withCount('boms'))
+        return DataTables::of(Produk::query()->with(['boms.detailBoms.material'])->withCount('boms'))
             ->addColumn('jumlah_bom', fn(Produk $produk) => $produk->boms_count)
-            ->addColumn('aksi', fn(Produk $produk) => view('partials.datatables.actions', ['editUrl' => route('produk.edit', $produk), 'deleteUrl' => route('produk.destroy', $produk)])->render())
-            ->rawColumns(['aksi'])
+            ->addColumn('bom', fn(Produk $produk) => view('partials.datatables.bom-summary', compact('produk'))->render())
+            ->addColumn('aksi', fn(Produk $produk) => view('partials.datatables.actions', ['showUrl' => route('produk.show', $produk), 'editUrl' => route('produk.edit', $produk), 'deleteUrl' => route('produk.destroy', $produk)])->render())
+            ->rawColumns(['aksi', 'bom'])
             ->make(true);
     }
 

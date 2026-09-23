@@ -71,6 +71,43 @@ class PurchaseOrderService
         });
     }
 
+    public function revisiPO(PurchaseOrder $po, array $data): void
+    {
+        DB::transaction(function () use ($po, $data): void {
+            if ($po->status_po !== 'rejected') {
+                throw new RuntimeException('Hanya PO rejected yang dapat direvisi.');
+            }
+            if (empty($data['details']) || !is_array($data['details'])) {
+                throw new InvalidArgumentException('Detail revisi purchase order wajib diisi.');
+            }
+
+            $minimumByMaterial = $po->detailPos()
+                ->pluck('jumlah_material', 'material_id')
+                ->map(fn ($jumlah) => (int) $jumlah)
+                ->all();
+            foreach ($data['details'] as $detail) {
+                $minimum = $minimumByMaterial[(int) $detail['material_id']] ?? 1;
+                if ((int) $detail['jumlah_material'] < $minimum) {
+                    throw new InvalidArgumentException("Jumlah material tidak boleh kurang dari {$minimum}, sesuai nominal PO sebelumnya.");
+                }
+            }
+
+            $po->update([
+                'status_po' => 'diajukan',
+                'tanggal_po' => $data['tanggal_po'],
+                'catatan_penolakan' => null,
+            ]);
+            $po->detailPos()->delete();
+            $po->detailPos()->createMany(array_map(
+                fn (array $detail): array => [
+                    'material_id' => $detail['material_id'],
+                    'jumlah_material' => $detail['jumlah_material'],
+                ],
+                $data['details']
+            ));
+        });
+    }
+
     public function terimaMaterialPO(PurchaseOrder $po, array $itemsDiterima): void
     {
         DB::transaction(function () use ($po, $itemsDiterima): void {
@@ -103,7 +140,7 @@ class PurchaseOrderService
 
             if ($po->permintaanProduksi) {
                 $po->permintaanProduksi->update([
-                    'status_permintaan' => $hasDefect ? 'material_po_cacat' : 'pending',
+                    'status_permintaan' => $hasDefect ? 'material_po_cacat' : 'siap_diproduksi',
                 ]);
             }
         });

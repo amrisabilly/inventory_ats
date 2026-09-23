@@ -39,6 +39,9 @@
                         Order</a>
                     <a href="{{ route('users.index') }}"
                         class="flex items-center rounded-lg px-3 py-2.5 text-sm text-white/75 hover:bg-white/10 hover:text-white">User</a>
+                    <a href="{{ route('permintaan-produksi.index') }}"
+                        class="flex items-center rounded-lg px-3 py-2.5 text-sm text-white/75 hover:bg-white/10 hover:text-white">Permintaan
+                        Produksi</a>
                     <a href="{{ route('laporan.index') }}"
                         class="flex items-center rounded-lg px-3 py-2.5 text-sm text-white/75 hover:bg-white/10 hover:text-white">Laporan</a>
                 @endif
@@ -61,6 +64,9 @@
                     <a href="{{ route('stok-opname.index') }}"
                         class="flex items-center rounded-lg px-3 py-2.5 text-sm text-white/75 hover:bg-white/10 hover:text-white">Stok
                         Opname</a>
+                    <a href="{{ route('materials.index') }}"
+                        class="flex items-center rounded-lg px-3 py-2.5 text-sm text-white/75 hover:bg-white/10 hover:text-white">Stok
+                        Material</a>
                 @endif
             </nav>
 

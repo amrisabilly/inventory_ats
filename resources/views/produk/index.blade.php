@@ -7,6 +7,7 @@
         ['data' => 'nama_produk', 'title' => 'Produk'],
         ['data' => 'deskripsi', 'title' => 'Deskripsi'],
         ['data' => 'jumlah_bom', 'title' => 'Jumlah BOM'],
+        ['data' => 'bom', 'title' => 'Bill of Material', 'orderable' => false, 'searchable' => false],
         ['data' => 'aksi', 'title' => 'Aksi', 'orderable' => false, 'searchable' => false],
     ]" /></x-card>
 @endsection

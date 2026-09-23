@@ -14,5 +14,32 @@
                     href="{{ route('laporan.cetak-pdf', ['jenis' => $jenis, 'dari' => $dari, 'sampai' => $sampai]) }}"><x-button
                         type="button" variant="secondary">Cetak PDF</x-button></a></div>
         </form>
-    </div><x-card><x-data-table id="laporan-table" :ajax="route('laporan.data', ['jenis' => $jenis, 'dari' => $dari, 'sampai' => $sampai])" :columns="[['data' => 'id', 'title' => 'ID'], ['data' => 'created_at', 'title' => 'Dibuat']]" /></x-card>
+    </div>
+    <x-card>
+        @if ($jenis === 'po')
+            <x-data-table id="laporan-table" :ajax="route('laporan.data', ['jenis' => $jenis, 'dari' => $dari, 'sampai' => $sampai])" :columns="[
+                ['data' => 'nomor_po', 'title' => 'Nomor PO'],
+                ['data' => 'pengaju', 'title' => 'Pengaju'],
+                ['data' => 'status_po', 'title' => 'Status'],
+                ['data' => 'tanggal_po', 'title' => 'Tanggal PO'],
+            ]" />
+        @elseif ($jenis === 'opname')
+            <x-data-table id="laporan-table" :ajax="route('laporan.data', ['jenis' => $jenis, 'dari' => $dari, 'sampai' => $sampai])" :columns="[
+                ['data' => 'material_nama', 'title' => 'Material'],
+                ['data' => 'petugas', 'title' => 'Petugas'],
+                ['data' => 'stok_sistem', 'title' => 'Stok Sistem'],
+                ['data' => 'stok_fisik', 'title' => 'Stok Fisik'],
+                ['data' => 'selisih_stok', 'title' => 'Selisih'],
+                ['data' => 'tanggal_opname', 'title' => 'Tanggal'],
+            ]" />
+        @else
+            <x-data-table id="laporan-table" :ajax="route('laporan.data', ['jenis' => $jenis, 'dari' => $dari, 'sampai' => $sampai])" :columns="[
+                ['data' => 'nama_material', 'title' => 'Material'],
+                ['data' => 'satuan', 'title' => 'Satuan'],
+                ['data' => 'stok_sistem', 'title' => 'Stok Sistem'],
+                ['data' => 'stok_wip', 'title' => 'Stok WIP'],
+                ['data' => 'created_at', 'title' => 'Dibuat'],
+            ]" />
+        @endif
+    </x-card>
 @endsection

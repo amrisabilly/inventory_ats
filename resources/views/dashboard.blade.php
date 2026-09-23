@@ -21,8 +21,8 @@
                             order</x-button></a>
                 @elseif($role === 'admin')
                     <a href="{{ route('materials.create') }}"><x-button>Tambah material</x-button></a><a
-                        href="{{ route('purchase-orders.create') }}"><x-button variant="secondary">Ajukan purchase
-                        order</x-button></a>@else<a href="{{ route('stok-opname.create') }}"><x-button>Catat stok
+                        href="{{ route('permintaan-produksi.index') }}"><x-button variant="secondary">Proses permintaan
+                        produksi</x-button></a>@else<a href="{{ route('stok-opname.create') }}"><x-button>Catat stok
                             opname</x-button></a><a href="{{ route('permintaan-produksi.index') }}"><x-button
                             variant="secondary">Lihat produksi</x-button></a>
                 @endif

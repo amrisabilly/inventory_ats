@@ -3,11 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\RejectPurchaseOrderRequest;
-use App\Http\Requests\StorePurchaseOrderRequest;
+use App\Http\Requests\RevisePurchaseOrderRequest;
 use App\Http\Requests\TerimaMaterialPoRequest;
 use App\Models\Material;
 use App\Models\PurchaseOrder;
-use App\Models\PermintaanProduksi;
 use App\Services\PurchaseOrderService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -25,26 +24,36 @@ class PurchaseOrderController extends Controller
         return DataTables::of(PurchaseOrder::with(['user', 'permintaanProduksi']))
             ->addColumn('pengaju', fn(PurchaseOrder $row) => $row->user->nama)
             ->editColumn('status_po', fn(PurchaseOrder $row) => view('partials.datatables.status', ['status' => $row->status_po])->render())
-            ->addColumn('aksi', fn(PurchaseOrder $row) => view('partials.datatables.actions', ['showUrl' => route('purchase-orders.show', $row)])->render())
+            ->addColumn('aksi', fn (PurchaseOrder $row) => view('partials.datatables.actions', [
+                'showUrl' => route('purchase-orders.show', $row),
+                'editUrl' => auth()->user()->role === 'admin' && $row->status_po === 'rejected'
+                    ? route('purchase-orders.revisi-form', $row)
+                    : null,
+            ])->render())
             ->rawColumns(['aksi', 'status_po'])
             ->make(true);
-    }
-
-    public function create(): View
-    {
-        return view('purchase-orders.create', ['materials' => Material::orderBy('nama_material')->get(), 'permintaan' => PermintaanProduksi::where('status_permintaan', 'menunggu_po')->get()]);
-    }
-
-    public function store(StorePurchaseOrderRequest $request, PurchaseOrderService $service): RedirectResponse
-    {
-        $service->buatPO($request->validated(), auth()->user());
-
-        return redirect()->route('purchase-orders.index')->with('success', 'Purchase order berhasil diajukan.');
     }
 
     public function show(PurchaseOrder $purchaseOrder): View
     {
         return view('purchase-orders.show', ['purchaseOrder' => $purchaseOrder->load('detailPos.material', 'permintaanProduksi')]);
+    }
+
+    public function revisiForm(PurchaseOrder $purchaseOrder): View
+    {
+        abort_unless($purchaseOrder->status_po === 'rejected', 404);
+
+        return view('purchase-orders.revisi', [
+            'purchaseOrder' => $purchaseOrder->load('detailPos.material'),
+            'materials' => Material::orderBy('nama_material')->get(),
+        ]);
+    }
+
+    public function revisi(RevisePurchaseOrderRequest $request, PurchaseOrder $purchaseOrder, PurchaseOrderService $service): RedirectResponse
+    {
+        $service->revisiPO($purchaseOrder, $request->validated());
+
+        return redirect()->route('purchase-orders.show', $purchaseOrder)->with('success', 'PO berhasil direvisi dan diajukan ulang untuk approval manager.');
     }
 
     public function approve(PurchaseOrder $purchaseOrder, PurchaseOrderService $service): RedirectResponse
