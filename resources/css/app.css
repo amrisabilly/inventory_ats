@@ -1,3 +1,59 @@
+@import 'datatables.net-dt/css/dataTables.dataTables.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+	[x-cloak] {
+		display: none !important;
+	}
+
+	body {
+		@apply bg-surface text-text-primary antialiased;
+	}
+}
+
+@layer components {
+	.form-input {
+		@apply w-full rounded-lg border border-border bg-white px-3 py-2 text-sm text-text-primary outline-none transition placeholder:text-text-secondary focus:border-primary focus:ring-2 focus:ring-primary/10;
+	}
+
+	.dataTables_wrapper {
+		@apply text-sm text-text-secondary;
+	}
+
+	.dataTables_wrapper .dataTables_length select,
+	.dataTables_wrapper .dataTables_filter input {
+		@apply rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/10;
+	}
+
+	.dataTables_wrapper .dataTables_filter input {
+		@apply ml-2;
+	}
+
+	table.dataTable thead th {
+		@apply border-b border-border bg-surface px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-secondary;
+	}
+
+	table.dataTable tbody td {
+		@apply border-b border-border px-4 py-3 align-middle text-sm text-text-primary;
+	}
+
+	table.dataTable.no-footer {
+		@apply border-b-0;
+	}
+
+	.dataTables_wrapper .dataTables_paginate .paginate_button {
+		@apply rounded-md border-0 px-3 py-1.5 text-text-secondary;
+	}
+
+	.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+	.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+		@apply bg-primary text-white;
+	}
+
+	.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+		@apply bg-primary-light text-white;
+	}
+}
